@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { palette, cardShadow } from '../lib/designTokens';
+import { formatRelativeTime } from '../lib/time';
 import { FAB } from '../components';
 import { CreateTaskModal } from './CreateTaskModal';
 
@@ -27,6 +28,10 @@ type Task = {
   assignee_name: string | null;
   deadline: string | null;
   created_at: string;
+  /** Populated after §3 DB migration */
+  updated_by: string | null;
+  updated_by_name: string | null;
+  updated_at: string;
 };
 
 const STATUS_COLOR: Record<TaskStatus, string> = {
@@ -91,15 +96,19 @@ export function TasksScreen() {
 
     const rows: Task[] = (tasksRes.data ?? []).map((r: Record<string, unknown>) => {
       const assigneeId = (r.assignee_id as string | null) ?? null;
+      const updatedById = (r.updated_by as string | null) ?? null;
       return {
         id: String(r.id),
         title: String(r.title ?? ''),
         description: (r.description as string | null) ?? null,
         status: (r.status as TaskStatus) ?? 'todo',
         assignee_id: assigneeId,
-        assignee_name: assigneeId ? memberById.get(assigneeId) ?? null : null,
+        assignee_name: assigneeId ? (memberById.get(assigneeId) ?? null) : null,
         deadline: (r.deadline as string | null) ?? null,
         created_at: String(r.created_at ?? ''),
+        updated_by: updatedById,
+        updated_by_name: updatedById ? (memberById.get(updatedById) ?? null) : null,
+        updated_at: String(r.updated_at ?? r.created_at ?? ''),
       };
     });
 
@@ -127,7 +136,7 @@ export function TasksScreen() {
     const next = STATUS_CYCLE[item.status];
     const { error } = await supabase
       .from('tasks')
-      .update({ status: next })
+      .update({ status: next, updated_by: profile?.id ?? null })
       .eq('id', item.id);
     if (error) {
       Alert.alert('エラー', error.message);
@@ -221,6 +230,11 @@ export function TasksScreen() {
                   )}
                   {item.deadline && (
                     <Text style={styles.metaText}>📅 {item.deadline.slice(0, 10)}</Text>
+                  )}
+                  {item.updated_by_name && (
+                    <Text style={styles.metaText}>
+                      ✏️ {item.updated_by_name} · {formatRelativeTime(item.updated_at)}
+                    </Text>
                   )}
                 </View>
               </View>

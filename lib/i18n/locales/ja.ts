@@ -87,6 +87,7 @@ export const ja = {
     delete_button: 'タスクを削除',
     delete_confirm_title: 'タスクを削除',
     delete_confirm_message: '「{{title}}」を削除してもよろしいですか？',
+    last_edited_by: '{{name}} · {{time}}',
   },
 
   routines: {

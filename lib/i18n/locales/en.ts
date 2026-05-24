@@ -87,6 +87,7 @@ export const en = {
     delete_button: 'Delete task',
     delete_confirm_title: 'Delete task',
     delete_confirm_message: 'Delete "{{title}}"?',
+    last_edited_by: '{{name}} · {{time}}',
   },
 
   routines: {

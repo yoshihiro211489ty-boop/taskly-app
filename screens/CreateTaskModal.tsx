@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/AuthContext';
 import { palette, radii, spacing, typography, cardShadow } from '../lib/designTokens';
 import { Button, TextInput } from '../components';
 
@@ -78,6 +79,7 @@ export function CreateTaskModal({
   onClose,
   onSaved,
 }: Props) {
+  const { profile } = useAuth();
   const isEditMode = task != null;
 
   // Form state
@@ -156,6 +158,7 @@ export function CreateTaskModal({
       assignee_id: assigneeId,
       deadline,
       team_id: teamId,
+      updated_by: profile?.id ?? null,
     };
 
     let error: { message: string } | null = null;
