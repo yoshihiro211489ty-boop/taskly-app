@@ -1,0 +1,93 @@
+export const en = {
+  common: {
+    loading: 'Loading...',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    close: 'Close',
+    confirm: 'Confirm',
+    back: 'Back',
+    done: 'Done',
+    yes: 'Yes',
+    no: 'No',
+    ok: 'OK',
+    error: 'Error',
+    retry: 'Retry',
+    unknown_error: 'An unexpected error occurred.',
+  },
+
+  auth: {
+    app_name: 'タスクリー',
+    app_sub: 'Taskly',
+    tagline: 'Simple task & routine sharing for your team',
+    login_title: 'Log In',
+    signup_title: 'Create Account',
+    login_button: 'Log In',
+    signup_button: 'Create Account',
+    switch_to_signup: "Don't have an account? →",
+    switch_to_login: 'Already have an account? →',
+    name_label: 'Name',
+    name_placeholder: 'Jane Smith',
+    email_label: 'Email',
+    email_placeholder: 'example@email.com',
+    password_label: 'Password',
+    password_placeholder: '8 characters or more',
+    account_created: 'Account created. You can log in now.',
+    validation_email_password_required: 'Please enter your email and password.',
+    validation_name_required: 'Please enter your name.',
+  },
+
+  tasks: {
+    title: 'Tasks',
+    my_tasks: 'My Tasks',
+    all_team: 'All Team',
+    empty_title: 'No tasks yet',
+    status_todo: 'Not Started',
+    status_in_progress: 'In Progress',
+    status_done: 'Done',
+  },
+
+  routines: {
+    title: 'Routines',
+    empty_title: 'No routines yet',
+    progress: '{{done}} / {{total}} done',
+    freq_daily: 'Daily',
+    freq_weekly: 'Weekly',
+    freq_monthly: 'Monthly',
+  },
+
+  account: {
+    title: 'Account',
+    logout: 'Log Out',
+    logout_confirm_title: 'Log Out',
+    logout_confirm_message: 'Are you sure you want to log out?',
+    no_name: 'No name set',
+    role_owner: 'Owner',
+    role_member: 'Member',
+    language_label: 'Language',
+  },
+
+  navigation: {
+    tasks: 'Tasks',
+    routines: 'Routines',
+    account: 'Account',
+  },
+
+  team: {
+    no_team_title: "You're not part of a team",
+    no_team_hint: 'Create a team or join one using an invite link.',
+  },
+
+  errors: {
+    profile_not_found: 'Profile not found.',
+    use_auth_outside_provider: 'useAuth must be used inside <AuthProvider>',
+    network_error: 'A network error occurred.',
+    load_failed: 'Failed to load data.',
+    auth_failed: 'Authentication failed.',
+    invalid_credentials: 'Incorrect email or password.',
+    email_already_in_use: 'This email address is already in use.',
+    weak_password: 'Password is too short. Please use at least 8 characters.',
+    too_many_requests: 'Too many attempts. Please wait a moment and try again.',
+  },
+} as const;

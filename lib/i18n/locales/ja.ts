@@ -1,0 +1,93 @@
+export const ja = {
+  common: {
+    loading: '読み込み中...',
+    cancel: 'キャンセル',
+    save: '保存',
+    delete: '削除',
+    edit: '編集',
+    close: '閉じる',
+    confirm: '確認',
+    back: '戻る',
+    done: '完了',
+    yes: 'はい',
+    no: 'いいえ',
+    ok: 'OK',
+    error: 'エラー',
+    retry: '再試行',
+    unknown_error: '予期しないエラーが発生しました。',
+  },
+
+  auth: {
+    app_name: 'タスクリー',
+    app_sub: 'Taskly',
+    tagline: 'チームのタスクとルーティンをシンプルに',
+    login_title: 'ログイン',
+    signup_title: 'アカウント作成',
+    login_button: 'ログイン',
+    signup_button: 'アカウントを作成',
+    switch_to_signup: 'アカウントをお持ちでない方 →',
+    switch_to_login: 'すでにアカウントをお持ちの方 →',
+    name_label: 'お名前',
+    name_placeholder: '山田 太郎',
+    email_label: 'メールアドレス',
+    email_placeholder: 'example@email.com',
+    password_label: 'パスワード',
+    password_placeholder: '8文字以上',
+    account_created: 'アカウントを作成しました。そのままログインできます。',
+    validation_email_password_required: 'メールアドレスとパスワードを入力してください。',
+    validation_name_required: 'お名前を入力してください。',
+  },
+
+  tasks: {
+    title: 'タスク',
+    my_tasks: 'マイタスク',
+    all_team: 'チーム全体',
+    empty_title: 'タスクはありません',
+    status_todo: '未着手',
+    status_in_progress: '進行中',
+    status_done: '完了',
+  },
+
+  routines: {
+    title: 'ルーティン',
+    empty_title: 'ルーティンはありません',
+    progress: '{{done}} / {{total}} 完了',
+    freq_daily: '毎日',
+    freq_weekly: '毎週',
+    freq_monthly: '毎月',
+  },
+
+  account: {
+    title: 'アカウント',
+    logout: 'ログアウト',
+    logout_confirm_title: 'ログアウト',
+    logout_confirm_message: 'ログアウトしますか？',
+    no_name: '名前未設定',
+    role_owner: 'オーナー',
+    role_member: 'メンバー',
+    language_label: '言語',
+  },
+
+  navigation: {
+    tasks: 'タスク',
+    routines: 'ルーティン',
+    account: 'アカウント',
+  },
+
+  team: {
+    no_team_title: 'チームに参加していません',
+    no_team_hint: 'チームを作成するか、招待リンクから参加してください。',
+  },
+
+  errors: {
+    profile_not_found: 'プロフィールが見つかりませんでした。',
+    use_auth_outside_provider: 'useAuth は <AuthProvider> の中で使ってください',
+    network_error: 'ネットワークエラーが発生しました。',
+    load_failed: 'データの読み込みに失敗しました。',
+    auth_failed: '認証に失敗しました。',
+    invalid_credentials: 'メールアドレスまたはパスワードが正しくありません。',
+    email_already_in_use: 'このメールアドレスはすでに使用されています。',
+    weak_password: 'パスワードが短すぎます。8文字以上で入力してください。',
+    too_many_requests: 'しばらく待ってから再度お試しください。',
+  },
+} as const;

@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "タスクリー",
+    "slug": "taskly",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F6F8FC"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.taskly.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "プロフィール写真の設定に使用します。",
+        "NSCameraUsageDescription": "プロフィール写真の撮影に使用します。",
+        "NSUserNotificationsUsageDescription": "タスクの期限やルーティンのリマインダーをお知らせします。",
+        "NSUserTrackingUsageDescription": "アプリの改善のためにご利用状況を分析します。",
+        "UIBackgroundModes": ["fetch", "remote-notification"]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#F6F8FC"
+      },
+      "package": "com.taskly.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#4A90E2",
+          "sounds": []
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
