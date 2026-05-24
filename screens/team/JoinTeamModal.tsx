@@ -73,17 +73,36 @@ export function JoinTeamModal({ visible, onClose, onJoined }: Props) {
     const normalizedCode = trimmed.toLowerCase();
     const isShortCode = trimmed.length === SHORT_CODE_LENGTH;
 
-    let teamQuery = supabase.from('teams').select('id, name');
+    let team: { id: string; name: string } | null = null;
+    let teamError: { message: string } | null = null;
 
     if (isShortCode) {
-      // Match the first 8 characters of the team UUID
-      teamQuery = teamQuery.ilike('id', `${normalizedCode}%`);
+      // teams.id は uuid 型で PostgREST が ilike をサポートしないので、
+      // 一旦全件取得してクライアント側で UUID プレフィックス一致を取る。
+      // チーム数は数百〜数千規模を想定しており、scalability の懸念があれば
+      // 将来 short_code 専用カラムを teams テーブルに追加する。
+      const { data, error } = await supabase.from('teams').select('id, name');
+      if (error) {
+        teamError = error;
+      } else {
+        const matched = (data ?? []).filter((row: { id: string }) =>
+          String(row.id).toLowerCase().startsWith(normalizedCode),
+        );
+        if (matched.length === 1) {
+          team = matched[0] as { id: string; name: string };
+        } else if (matched.length > 1) {
+          teamError = { message: '招待コードが複数のチームに一致しました。フルUUIDを使用してください。' };
+        }
+      }
     } else {
-      // Assume full UUID
-      teamQuery = teamQuery.eq('id', normalizedCode);
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id, name')
+        .eq('id', normalizedCode)
+        .maybeSingle();
+      team = data as { id: string; name: string } | null;
+      teamError = error;
     }
-
-    const { data: team, error: teamError } = await teamQuery.maybeSingle();
 
     if (teamError) {
       setLoading(false);

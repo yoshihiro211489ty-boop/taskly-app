@@ -28,3 +28,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: Platform.OS === 'web',
   },
 });
+
+// DEV: ブラウザの dev console から Supabase クライアントに触れるようにする
+// （複数ユーザーで QA するため。本番ビルドでは __DEV__ が false なので動かない）
+declare const __DEV__: boolean;
+if (typeof __DEV__ !== 'undefined' && __DEV__ && Platform.OS === 'web' && typeof window !== 'undefined') {
+  (window as unknown as { __supabase: typeof supabase }).__supabase = supabase;
+}
