@@ -112,6 +112,9 @@ export const en = {
     stats_rate: 'Rate',
     stats_empty_title: 'No routines yet',
     stats_empty_hint: 'Add a routine to see your achievement here.',
+    stats_tab_mine: 'Me',
+    stats_tab_team: 'Team',
+    stats_team_empty: 'No routine records from team members yet.',
   },
 
   team: {

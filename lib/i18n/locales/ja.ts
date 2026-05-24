@@ -112,6 +112,9 @@ export const ja = {
     stats_rate: '達成率',
     stats_empty_title: 'ルーティンがありません',
     stats_empty_hint: 'ルーティンを追加すると達成状況が表示されます。',
+    stats_tab_mine: '自分',
+    stats_tab_team: 'チーム全体',
+    stats_team_empty: 'チームメンバーのルーティン記録がまだありません。',
   },
 
   team: {
