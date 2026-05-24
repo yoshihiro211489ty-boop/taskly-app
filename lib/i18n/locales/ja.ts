@@ -108,7 +108,7 @@ export const ja = {
     label_frequency: '頻度',
     add_button: '追加する',
     stats_title: '達成状況',
-    stats_period: '過去7日間',
+    stats_period: '過去30日',
     stats_rate: '達成率',
     stats_empty_title: 'ルーティンがありません',
     stats_empty_hint: 'ルーティンを追加すると達成状況が表示されます。',

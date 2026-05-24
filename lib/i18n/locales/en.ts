@@ -108,7 +108,7 @@ export const en = {
     label_frequency: 'Frequency',
     add_button: 'Add',
     stats_title: 'Achievement',
-    stats_period: 'Last 7 days',
+    stats_period: 'Last 30 days',
     stats_rate: 'Rate',
     stats_empty_title: 'No routines yet',
     stats_empty_hint: 'Add a routine to see your achievement here.',

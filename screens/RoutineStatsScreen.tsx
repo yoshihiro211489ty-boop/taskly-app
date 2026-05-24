@@ -11,6 +11,11 @@ import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { palette, cardShadow, typography, spacing, radii, statusColors } from '../lib/designTokens';
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const DAYS_WINDOW = 30;
+const GRID_COLS = 6; // 6 columns × 5 rows = 30 cells
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type RoutineRow = {
@@ -21,17 +26,17 @@ type RoutineRow = {
 
 type RoutineStat = {
   routine: RoutineRow;
-  /** Array of 7 booleans, index 0 = oldest day, index 6 = today */
+  /** Array of 30 booleans, index 0 = oldest day, index 29 = today */
   days: boolean[];
   completionRate: number;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Returns an array of 7 date strings YYYY-MM-DD, oldest first, ending today. */
-function getLast7Days(): string[] {
+/** Returns an array of n date strings YYYY-MM-DD, oldest first, ending today. */
+function getLastNDays(n: number): string[] {
   const days: string[] = [];
-  for (let i = 6; i >= 0; i--) {
+  for (let i = n - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     days.push(d.toISOString().slice(0, 10));
@@ -39,11 +44,10 @@ function getLast7Days(): string[] {
   return days;
 }
 
-/** Short day labels: 月, 火, … */
-const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
-
-function getDayLabel(dateStr: string): string {
-  return DAY_LABELS[new Date(dateStr).getDay()];
+/** Format YYYY-MM-DD as YYYY/M/D */
+function formatDateShort(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${y}/${parseInt(m)}/${parseInt(d)}`;
 }
 
 const FREQ_LABEL: Record<string, string> = {
@@ -60,10 +64,9 @@ export function RoutineStatsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // NOTE: getLast7Days() を render 中に呼んで useCallback の deps に入れると
-  //   毎 render で新しい配列 → load 関数が再生成 → useEffect が再実行 → 無限ループ。
-  //   マウント時に 1 度だけ算出して固定する。
-  const last7Days = useMemo(() => getLast7Days(), []);
+  // Computed once at mount. Using useMemo prevents infinite-loop in useEffect
+  // (new array every render → new load fn → useEffect fires every render).
+  const lastDays = useMemo(() => getLastNDays(DAYS_WINDOW), []);
 
   const load = useCallback(async () => {
     if (!profile?.teamId || !profile?.id) return;
@@ -91,8 +94,8 @@ export function RoutineStatsScreen() {
       return;
     }
 
-    // 2. Fetch this user's logs for the last 7 days
-    const oldest = last7Days[0];
+    // 2. Fetch this user's logs for the last 30 days
+    const oldest = lastDays[0];
     const { data: logsData, error: logsError } = await supabase
       .from('routine_logs')
       .select('routine_id, done_date')
@@ -114,13 +117,14 @@ export function RoutineStatsScreen() {
 
     // 3. Build stats
     const result: RoutineStat[] = routines.map((routine) => {
-      const days = last7Days.map((d) => doneSet.has(`${routine.id}|${d}`));
-      const completionRate = Math.round((days.filter(Boolean).length / 7) * 100);
+      const days = lastDays.map((d) => doneSet.has(`${routine.id}|${d}`));
+      const doneCount = days.filter(Boolean).length;
+      const completionRate = Math.round((doneCount / DAYS_WINDOW) * 100);
       return { routine, days, completionRate };
     });
 
     setStats(result);
-  }, [profile, last7Days]);
+  }, [profile, lastDays]);
 
   useEffect(() => {
     let cancelled = false;
@@ -161,20 +165,9 @@ export function RoutineStatsScreen() {
       {/* Screen header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>達成状況</Text>
-        <Text style={styles.headerSub}>過去7日間</Text>
-      </View>
-
-      {/* Day-of-week column headers */}
-      <View style={styles.dayHeaderRow}>
-        <View style={styles.routineNamePlaceholder} />
-        {last7Days.map((d) => (
-          <View key={d} style={styles.dayHeaderCell}>
-            <Text style={styles.dayHeaderText}>{getDayLabel(d)}</Text>
-          </View>
-        ))}
-        <View style={styles.rateHeaderCell}>
-          <Text style={styles.dayHeaderText}>達成率</Text>
-        </View>
+        <Text style={styles.headerSub}>
+          {formatDateShort(lastDays[0])} 〜 {formatDateShort(lastDays[lastDays.length - 1])}
+        </Text>
       </View>
 
       {loading ? (
@@ -194,7 +187,7 @@ export function RoutineStatsScreen() {
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           renderItem={({ item }) => (
-            <RoutineStatRow stat={item} dates={last7Days} />
+            <RoutineStatCard stat={item} dates={lastDays} />
           )}
         />
       )}
@@ -202,20 +195,31 @@ export function RoutineStatsScreen() {
   );
 }
 
-// ─── Row sub-component ────────────────────────────────────────────────────────
+// ─── Card sub-component ───────────────────────────────────────────────────────
 
-type RowProps = {
+type CardProps = {
   stat: RoutineStat;
   dates: string[];
 };
 
-function RoutineStatRow({ stat, dates }: RowProps) {
+function RoutineStatCard({ stat, dates }: CardProps) {
   const { routine, days, completionRate } = stat;
   const freqColors = statusColors[routine.frequency];
 
+  // Split 30 days into rows of GRID_COLS (6 cols × 5 rows)
+  const rows: Array<{ day: boolean; date: string }[]> = [];
+  for (let i = 0; i < days.length; i += GRID_COLS) {
+    rows.push(
+      days.slice(i, i + GRID_COLS).map((done, j) => ({
+        day: done,
+        date: dates[i + j],
+      }))
+    );
+  }
+
   return (
     <View style={styles.card}>
-      {/* Routine name + freq badge */}
+      {/* Top row: title + freq badge + rate */}
       <View style={styles.cardTop}>
         <Text style={styles.routineTitle} numberOfLines={1}>{routine.title}</Text>
         <View style={[styles.freqBadge, { backgroundColor: freqColors.bg, borderColor: freqColors.border }]}>
@@ -223,27 +227,29 @@ function RoutineStatRow({ stat, dates }: RowProps) {
             {FREQ_LABEL[routine.frequency] ?? routine.frequency}
           </Text>
         </View>
+        <Text
+          style={[
+            styles.rateText,
+            completionRate === 100 && styles.rateTextPerfect,
+            completionRate === 0 && styles.rateTextZero,
+          ]}
+        >
+          {completionRate}%
+        </Text>
       </View>
 
-      {/* Dot grid + completion rate */}
-      <View style={styles.dotRow}>
-        {days.map((done, i) => (
-          <View key={dates[i]} style={styles.dotCell}>
-            <View style={[styles.dot, done ? styles.dotDone : styles.dotEmpty]} />
-            <Text style={styles.dotDate}>{dates[i].slice(8)}</Text>
+      {/* 6 × 5 dot grid */}
+      <View style={styles.grid}>
+        {rows.map((row, r) => (
+          <View key={r} style={styles.gridRow}>
+            {row.map(({ day, date }) => (
+              <View key={date} style={styles.cell}>
+                <View style={[styles.dot, day ? styles.dotDone : styles.dotEmpty]} />
+                <Text style={styles.dotLabel}>{date.slice(8)}</Text>
+              </View>
+            ))}
           </View>
         ))}
-        <View style={styles.rateCell}>
-          <Text
-            style={[
-              styles.rateText,
-              completionRate === 100 && styles.rateTextPerfect,
-              completionRate === 0 && styles.rateTextZero,
-            ]}
-          >
-            {completionRate}%
-          </Text>
-        </View>
       </View>
     </View>
   );
@@ -251,8 +257,7 @@ function RoutineStatRow({ stat, dates }: RowProps) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const DOT_SIZE = 18;
-const CELL_WIDTH = 32;
+const DOT_SIZE = 14;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bgPage },
@@ -275,30 +280,11 @@ const styles = StyleSheet.create({
     color: palette.text,
   },
   headerSub: {
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
     color: palette.textSubtle,
     fontWeight: '600',
     paddingBottom: 2,
   },
-
-  // Column headers
-  dayHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing['4'],
-    paddingVertical: spacing['2'],
-    backgroundColor: palette.bgCard,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.borderLight,
-  },
-  routineNamePlaceholder: { flex: 1 },
-  dayHeaderCell: { width: CELL_WIDTH, alignItems: 'center' },
-  dayHeaderText: {
-    fontSize: typography.sizes.xs,
-    color: palette.textSubtle,
-    fontWeight: '600',
-  },
-  rateHeaderCell: { width: 44, alignItems: 'center' },
 
   list: { padding: spacing['4'], gap: spacing['3'], paddingBottom: 40 },
 
@@ -331,20 +317,34 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xs,
     fontWeight: '700',
   },
-
-  dotRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  rateText: {
+    fontSize: typography.sizes.sm,
+    fontWeight: '700',
+    color: palette.textMuted,
+    minWidth: 36,
+    textAlign: 'right',
   },
-  dotCell: {
-    width: CELL_WIDTH,
+  rateTextPerfect: { color: palette.success },
+  rateTextZero: { color: palette.neutral },
+
+  // Grid
+  grid: {
+    gap: 4,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  cell: {
+    flex: 1,
     alignItems: 'center',
-    gap: 3,
+    paddingVertical: 2,
   },
   dot: {
     width: DOT_SIZE,
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
+    marginBottom: 2,
   },
   dotDone: {
     backgroundColor: palette.success,
@@ -354,25 +354,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: palette.border,
   },
-  dotDate: {
+  dotLabel: {
     fontSize: 9,
     color: palette.textSubtle,
     fontWeight: '500',
-  },
-  rateCell: {
-    width: 44,
-    alignItems: 'center',
-  },
-  rateText: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '700',
-    color: palette.textMuted,
-  },
-  rateTextPerfect: {
-    color: palette.success,
-  },
-  rateTextZero: {
-    color: palette.neutral,
   },
 
   emptyEmoji: { fontSize: 40, marginBottom: 12 },
