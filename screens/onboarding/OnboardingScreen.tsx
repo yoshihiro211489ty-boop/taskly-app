@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { palette, typography, spacing, radii } from '../../lib/designTokens';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -21,33 +22,35 @@ type Page = {
   body: string;
 };
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const PAGES: Page[] = [
-  {
-    key: 'welcome',
-    emoji: '📋',
-    title: 'タスクをチームで共有',
-    body: '一人で抱え込まない。タスクをみんなで見える化しよう。',
-  },
-  {
-    key: 'routines',
-    emoji: '🔁',
-    title: 'ルーティンで習慣を作る',
-    body: '毎日・毎週・毎月の繰り返しタスクをチームで確認。誰が完了したかが一目でわかる。',
-  },
-  {
-    key: 'getstarted',
-    emoji: '🎯',
-    title: 'さあ、始めよう',
-    body: 'まずはチームを作るか、招待コードで参加してください。',
-  },
-];
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function OnboardingScreen({ onComplete }: Props) {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const PAGES: Page[] = useMemo(
+    () => [
+      {
+        key: 'welcome',
+        emoji: '📋',
+        title: t('onboarding.page1_title'),
+        body: t('onboarding.page1_body'),
+      },
+      {
+        key: 'routines',
+        emoji: '🔁',
+        title: t('onboarding.page2_title'),
+        body: t('onboarding.page2_body'),
+      },
+      {
+        key: 'getstarted',
+        emoji: '🎯',
+        title: t('onboarding.page3_title'),
+        body: t('onboarding.page3_body'),
+      },
+    ],
+    [t],
+  );
 
   const isLastPage = activeIndex === PAGES.length - 1;
   const currentPage = PAGES[activeIndex];
@@ -58,7 +61,7 @@ export function OnboardingScreen({ onComplete }: Props) {
     } else {
       setActiveIndex((i) => Math.min(i + 1, PAGES.length - 1));
     }
-  }, [isLastPage, onComplete]);
+  }, [isLastPage, onComplete, PAGES.length]);
 
   const handleSkip = useCallback(() => {
     onComplete();
@@ -77,9 +80,9 @@ export function OnboardingScreen({ onComplete }: Props) {
             style={styles.skipBtn}
             onPress={handleSkip}
             hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}
-            accessibilityLabel="スキップ"
+            accessibilityLabel={t('onboarding.skip')}
           >
-            <Text style={styles.skipBtnText}>スキップ</Text>
+            <Text style={styles.skipBtnText}>{t('onboarding.skip')}</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.skipBtnPlaceholder} />
@@ -117,18 +120,18 @@ export function OnboardingScreen({ onComplete }: Props) {
               style={styles.nextBtn}
               onPress={handleNext}
               activeOpacity={0.82}
-              accessibilityLabel="次へ"
+              accessibilityLabel={t('onboarding.next')}
             >
-              <Text style={styles.nextBtnText}>次へ →</Text>
+              <Text style={styles.nextBtnText}>{t('onboarding.next')}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={styles.startBtn}
               onPress={onComplete}
               activeOpacity={0.82}
-              accessibilityLabel="始める"
+              accessibilityLabel={t('onboarding.start')}
             >
-              <Text style={styles.startBtnText}>始める 🎯</Text>
+              <Text style={styles.startBtnText}>{t('onboarding.start')}</Text>
             </TouchableOpacity>
           )}
         </View>

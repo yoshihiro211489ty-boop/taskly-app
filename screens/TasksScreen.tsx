@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { palette, cardShadow } from '../lib/designTokens';
@@ -28,12 +29,6 @@ type Task = {
   created_at: string;
 };
 
-const STATUS_LABEL: Record<TaskStatus, string> = {
-  todo: '未着手',
-  in_progress: '進行中',
-  done: '完了',
-};
-
 const STATUS_COLOR: Record<TaskStatus, string> = {
   todo: palette.neutral,
   in_progress: palette.primary,
@@ -47,6 +42,12 @@ const STATUS_CYCLE: Record<TaskStatus, TaskStatus> = {
 };
 
 export function TasksScreen() {
+  const { t } = useTranslation();
+  const STATUS_LABEL: Record<TaskStatus, string> = {
+    todo: t('tasks.status_todo'),
+    in_progress: t('tasks.status_in_progress'),
+    done: t('tasks.status_done'),
+  };
   const { profile } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
@@ -147,8 +148,8 @@ export function TasksScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.emptyEmoji}>👥</Text>
-        <Text style={styles.emptyTitle}>チームに参加していません</Text>
-        <Text style={styles.emptyHint}>チームを作成するか、招待リンクから参加してください。</Text>
+        <Text style={styles.emptyTitle}>{t('team.no_team_title')}</Text>
+        <Text style={styles.emptyHint}>{t('team.no_team_hint')}</Text>
       </View>
     );
   }
@@ -156,7 +157,7 @@ export function TasksScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>タスク</Text>
+        <Text style={styles.headerTitle}>{t('tasks.title')}</Text>
         {profile.teamName && (
           <Text style={styles.headerTeam}>{profile.teamName}</Text>
         )}
@@ -170,7 +171,7 @@ export function TasksScreen() {
             onPress={() => setFilter(f)}
           >
             <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f === 'mine' ? 'マイタスク' : 'チーム全体'}
+              {f === 'mine' ? t('tasks.my_tasks') : t('tasks.all_team')}
             </Text>
           </TouchableOpacity>
         ))}
@@ -181,7 +182,7 @@ export function TasksScreen() {
       ) : filteredTasks.length === 0 ? (
         <View style={styles.centered}>
           <Text style={styles.emptyEmoji}>📭</Text>
-          <Text style={styles.emptyTitle}>タスクはありません</Text>
+          <Text style={styles.emptyTitle}>{t('tasks.empty_title')}</Text>
         </View>
       ) : (
         <FlatList

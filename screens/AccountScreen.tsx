@@ -19,6 +19,8 @@ import type { RootStackParamList } from '../navigation/RootStack';
 import { useAuth } from '../lib/AuthContext';
 import { palette, cardShadow, typography, spacing, radii } from '../lib/designTokens';
 import { LanguageSwitcher } from '../lib/i18n/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
+import { InviteCodeModal } from './team/InviteCodeModal';
 import Constants from 'expo-constants';
 
 // ─── External URLs ───────────────────────────────────────────────────────────
@@ -96,6 +98,7 @@ function PasswordChangeModal({
   visible: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { updatePassword } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -116,15 +119,15 @@ function PasswordChangeModal({
     setMessage(null);
 
     if (!currentPassword) {
-      setMessage({ text: '現在のパスワードを入力してください', isError: true });
+      setMessage({ text: t('account.change_password_required_current'), isError: true });
       return;
     }
     if (newPassword.length < 8) {
-      setMessage({ text: '新しいパスワードは8文字以上で入力してください', isError: true });
+      setMessage({ text: t('account.change_password_too_short'), isError: true });
       return;
     }
     if (newPassword !== confirmPassword) {
-      setMessage({ text: 'パスワードが一致しません', isError: true });
+      setMessage({ text: t('account.change_password_mismatch'), isError: true });
       return;
     }
 
@@ -135,7 +138,7 @@ function PasswordChangeModal({
     if (error) {
       setMessage({ text: error, isError: true });
     } else {
-      setMessage({ text: 'パスワードを変更しました', isError: false });
+      setMessage({ text: t('account.change_password_success'), isError: false });
       setTimeout(handleClose, 1500);
     }
   };
@@ -147,42 +150,42 @@ function PasswordChangeModal({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>パスワードを変更</Text>
+          <Text style={styles.modalTitle}>{t('account.change_password')}</Text>
           <TouchableOpacity onPress={handleClose} style={styles.modalCloseBtn}>
-            <Text style={styles.modalCloseText}>閉じる</Text>
+            <Text style={styles.modalCloseText}>{t('common.close')}</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
-          <Text style={styles.inputLabel}>現在のパスワード</Text>
+          <Text style={styles.inputLabel}>{t('account.change_password_current')}</Text>
           <TextInput
             style={styles.textInput}
             value={currentPassword}
             onChangeText={setCurrentPassword}
             secureTextEntry
-            placeholder="現在のパスワード"
+            placeholder={t('account.change_password_current_placeholder')}
             placeholderTextColor={palette.textSubtle}
             autoCapitalize="none"
           />
 
-          <Text style={styles.inputLabel}>新しいパスワード</Text>
+          <Text style={styles.inputLabel}>{t('account.change_password_new')}</Text>
           <TextInput
             style={styles.textInput}
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry
-            placeholder="8文字以上"
+            placeholder={t('account.change_password_new_placeholder')}
             placeholderTextColor={palette.textSubtle}
             autoCapitalize="none"
           />
 
-          <Text style={styles.inputLabel}>新しいパスワード（確認）</Text>
+          <Text style={styles.inputLabel}>{t('account.change_password_confirm')}</Text>
           <TextInput
             style={styles.textInput}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
-            placeholder="もう一度入力"
+            placeholder={t('account.change_password_confirm_placeholder')}
             placeholderTextColor={palette.textSubtle}
             autoCapitalize="none"
           />
@@ -213,7 +216,7 @@ function PasswordChangeModal({
             {saving ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.saveBtnText}>保存する</Text>
+              <Text style={styles.saveBtnText}>{t('account.change_password_save')}</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -224,35 +227,37 @@ function PasswordChangeModal({
 
 // ─── AccountScreen ────────────────────────────────────────────────────────────
 export function AccountScreen() {
+  const { t } = useTranslation();
   const { profile, signOut, deleteAccount } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [pwModalVisible, setPwModalVisible] = useState(false);
+  const [inviteModalVisible, setInviteModalVisible] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleSignOut = () => {
-    Alert.alert('ログアウト', 'ログアウトしますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: 'ログアウト', style: 'destructive', onPress: () => void signOut() },
+    Alert.alert(t('account.logout_confirm_title'), t('account.logout_confirm_message'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('account.logout'), style: 'destructive', onPress: () => void signOut() },
     ]);
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'アカウントを削除しますか？',
-      'この操作は取り消せません。すべてのデータ（タスク、ルーティン記録、チーム情報）が完全に削除されます。',
+      t('account.delete_account_confirm_title'),
+      t('account.delete_account_confirm_message'),
       [
-        { text: 'キャンセル', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: '削除する',
+          text: t('account.delete_confirm_button'),
           style: 'destructive',
           onPress: async () => {
             setDeletingAccount(true);
             const { error } = await deleteAccount();
             setDeletingAccount(false);
             if (error) {
-              Alert.alert('エラー', error);
+              Alert.alert(t('common.error'), error);
             }
           },
         },
@@ -268,54 +273,22 @@ export function AccountScreen() {
     }
   };
 
-  const copyToClipboard = async (text: string): Promise<boolean> => {
-    // Web: navigator.clipboard
-    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-    // Native: expo-clipboard
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const Clipboard = require('expo-clipboard') as {
-        setStringAsync: (text: string) => Promise<void>;
-      };
-      await Clipboard.setStringAsync(text);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const handleInvite = async () => {
+  const handleInvite = () => {
     if (!profile?.teamId) return;
-    const inviteLink = `taskly://join/${profile.teamId}`;
-    const copied = await copyToClipboard(inviteLink);
-    if (copied) {
-      showAlert(
-        'コピーしました',
-        `招待リンクをクリップボードにコピーしました。\n\n${inviteLink}`,
-      );
-    } else {
-      showAlert('招待リンク', inviteLink);
-    }
+    setInviteModalVisible(true);
   };
 
   const handlePrivacy = () => {
     if (PRIVACY_URL) void Linking.openURL(PRIVACY_URL);
-    else showAlert('準備中', 'プライバシーポリシーは現在準備中です。');
+    else showAlert(t('common.coming_soon'), t('account.privacy_coming_soon'));
   };
   const handleTerms = () => {
     if (TERMS_URL) void Linking.openURL(TERMS_URL);
-    else showAlert('準備中', '利用規約は現在準備中です。');
+    else showAlert(t('common.coming_soon'), t('account.terms_coming_soon'));
   };
   const handleSupport = () => {
     if (SUPPORT_EMAIL) void Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=お問い合わせ`);
-    else showAlert('準備中', 'お問い合わせ窓口は現在準備中です。');
+    else showAlert(t('common.coming_soon'), t('account.contact_coming_soon'));
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -323,7 +296,7 @@ export function AccountScreen() {
   return (
     <>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>アカウント</Text>
+        <Text style={styles.headerTitle}>{t('account.title')}</Text>
       </View>
 
       <ScrollView
@@ -338,7 +311,7 @@ export function AccountScreen() {
               {profile?.name?.charAt(0)?.toUpperCase() ?? '?'}
             </Text>
           </View>
-          <Text style={styles.name}>{profile?.name ?? '名前未設定'}</Text>
+          <Text style={styles.name}>{profile?.name ?? t('account.no_name')}</Text>
           <Text style={styles.email}>{profile?.email ?? ''}</Text>
           <View style={styles.badgeRow}>
             {profile?.teamName ? (
@@ -348,23 +321,23 @@ export function AccountScreen() {
             ) : null}
             <View style={styles.roleBadge}>
               <Text style={styles.roleText}>
-                {profile?.role === 'owner' ? 'オーナー' : 'メンバー'}
+                {profile?.role === 'owner' ? t('account.role_owner') : t('account.role_member')}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* ── チーム ───────────────────────────────────────────────────────── */}
-        <Section title="チーム">
+        {/* ── Team ────────────────────────────────────────────────────────── */}
+        <Section title={t('account.section_team')}>
           <SettingsRow
             icon="🏠"
-            label="チーム名"
-            value={profile?.teamName ?? '未参加'}
+            label={t('account.team_name_label')}
+            value={profile?.teamName ?? '-'}
           />
           <View style={styles.rowSeparator} />
           <SettingsRow
             icon="👥"
-            label="チームメンバー"
+            label={t('account.team_members_label')}
             onPress={() => navigation.navigate('TeamMembers')}
           />
           {profile?.role === 'owner' && profile?.teamId ? (
@@ -372,66 +345,66 @@ export function AccountScreen() {
               <View style={styles.rowSeparator} />
               <SettingsRow
                 icon="✉️"
-                label="メンバーを招待"
+                label={t('account.invite_label')}
                 onPress={handleInvite}
               />
             </>
           ) : null}
         </Section>
 
-        {/* ── 設定 ─────────────────────────────────────────────────────────── */}
-        <Section title="設定">
+        {/* ── Settings ────────────────────────────────────────────────────── */}
+        <Section title={t('account.section_settings')}>
           <SettingsRow
             icon="🌐"
-            label="言語"
+            label={t('account.language_label')}
             rightElement={<LanguageSwitcher />}
           />
           <View style={styles.rowSeparator} />
           <SettingsRow
             icon="🔑"
-            label="パスワードを変更"
+            label={t('account.change_password')}
             onPress={() => setPwModalVisible(true)}
           />
         </Section>
 
-        {/* ── サポート ─────────────────────────────────────────────────────── */}
-        <Section title="サポート">
+        {/* ── Support ─────────────────────────────────────────────────────── */}
+        <Section title={t('account.section_support')}>
           <SettingsRow
             icon="🔒"
-            label="プライバシーポリシー"
+            label={t('account.privacy')}
             onPress={handlePrivacy}
           />
           <View style={styles.rowSeparator} />
           <SettingsRow
             icon="📄"
-            label="利用規約"
+            label={t('account.terms')}
             onPress={handleTerms}
           />
           <View style={styles.rowSeparator} />
           <SettingsRow
             icon="💬"
-            label="お問い合わせ"
+            label={t('account.contact')}
             onPress={handleSupport}
           />
         </Section>
 
-        {/* ── アカウント ───────────────────────────────────────────────────── */}
-        <Section title="アカウント">
+        {/* ── Account ─────────────────────────────────────────────────────── */}
+        <Section title={t('account.section_account')}>
           <SettingsRow
             icon="🚪"
-            label="ログアウト"
+            label={t('account.logout')}
             onPress={handleSignOut}
           />
           <View style={styles.rowSeparator} />
           {deletingAccount ? (
             <View style={[styles.row, styles.rowDeleteLoading]}>
               <ActivityIndicator color={palette.error} size="small" />
-              <Text style={styles.deletingText}>削除中...</Text>
+              <Text style={styles.deletingText}>{t('common.loading')}</Text>
             </View>
           ) : (
             <SettingsRow
               icon="🗑️"
-              label="アカウントを削除"
+              label={t('account.delete_account')}
               onPress={handleDeleteAccount}
               destructive
             />
@@ -439,13 +412,21 @@ export function AccountScreen() {
         </Section>
 
         {/* ── Footer ──────────────────────────────────────────────────────── */}
-        <Text style={styles.versionText}>バージョン {APP_VERSION}</Text>
+        <Text style={styles.versionText}>{t('account.version', { version: APP_VERSION })}</Text>
       </ScrollView>
 
       {/* ── Password change modal ────────────────────────────────────────── */}
       <PasswordChangeModal
         visible={pwModalVisible}
         onClose={() => setPwModalVisible(false)}
+      />
+
+      {/* ── Invite modal ────────────────────────────────────────────────── */}
+      <InviteCodeModal
+        visible={inviteModalVisible}
+        teamId={profile?.teamId ?? null}
+        teamName={profile?.teamName ?? null}
+        onClose={() => setInviteModalVisible(false)}
       />
     </>
   );

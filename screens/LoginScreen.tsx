@@ -10,12 +10,14 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { palette } from '../lib/designTokens';
 
 type Step = 'email' | 'code';
 
 export function LoginScreen() {
+  const { t } = useTranslation();
   const { sendOtp, verifyOtp, signInAsGuest } = useAuth();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
@@ -36,7 +38,7 @@ export function LoginScreen() {
     setError(null);
     const trimmed = email.trim();
     if (!trimmed || !trimmed.includes('@')) {
-      setError('有効なメールアドレスを入力してください。');
+      setError(t('auth.validation_email_invalid'));
       return;
     }
     setLoading(true);
@@ -53,7 +55,7 @@ export function LoginScreen() {
     setError(null);
     const trimmedCode = code.trim();
     if (!trimmedCode || trimmedCode.length < 6) {
-      setError('6桁のコードを入力してください。');
+      setError(t('auth.validation_code_short'));
       return;
     }
     setLoading(true);
@@ -83,19 +85,17 @@ export function LoginScreen() {
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ロゴ */}
+        {/* Logo */}
         <View style={styles.logoArea}>
-          <Text style={styles.appName}>タスクリー</Text>
-          <Text style={styles.appSub}>Taskly</Text>
-          <Text style={styles.tagline}>チームのタスクとルーティンをシンプルに</Text>
+          <Text style={styles.appName}>{t('auth.app_name')}</Text>
+          <Text style={styles.appSub}>{t('auth.app_sub')}</Text>
+          <Text style={styles.tagline}>{t('auth.tagline')}</Text>
         </View>
 
-        {/* ゲストログイン（一発で入れる） */}
+        {/* Guest login */}
         <View style={styles.guestCard}>
-          <Text style={styles.guestTitle}>👋 とりあえず試してみる</Text>
-          <Text style={styles.guestDesc}>
-            メール不要・ワンタップ。後でアカウントに変換できます。
-          </Text>
+          <Text style={styles.guestTitle}>{t('auth.guest_card_title')}</Text>
+          <Text style={styles.guestDesc}>{t('auth.guest_card_desc')}</Text>
           <TouchableOpacity
             style={[styles.guestBtn, guestLoading && styles.primaryBtnDisabled]}
             onPress={handleGuestLogin}
@@ -104,31 +104,28 @@ export function LoginScreen() {
             {guestLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.guestBtnText}>ゲストとして始める 🚀</Text>
+              <Text style={styles.guestBtnText}>{t('auth.guest_button')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>または</Text>
+          <Text style={styles.dividerText}>{t('auth.or_divider')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
         <View style={styles.card}>
           {step === 'email' ? (
             <>
-              <Text style={styles.cardTitle}>メールでログイン</Text>
-              <Text style={styles.cardDesc}>
-                メールアドレスを入力すると、{'\n'}
-                6桁のログインコードをお送りします。パスワード不要です。
-              </Text>
+              <Text style={styles.cardTitle}>{t('auth.email_login_title')}</Text>
+              <Text style={styles.cardDesc}>{t('auth.email_login_desc')}</Text>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>メールアドレス</Text>
+                <Text style={styles.label}>{t('auth.email_label')}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="you@example.com"
+                  placeholder={t('auth.email_placeholder')}
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -153,27 +150,23 @@ export function LoginScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryBtnText}>コードを送る 📨</Text>
+                  <Text style={styles.primaryBtnText}>{t('auth.send_code')}</Text>
                 )}
               </TouchableOpacity>
             </>
           ) : (
             <>
               <Text style={styles.sentEmoji}>📬</Text>
-              <Text style={styles.cardTitle}>コードを入力してください</Text>
-              <Text style={styles.cardDesc}>
-                <Text style={styles.emailHighlight}>{email}</Text>
-                {' '}に6桁のコードを送りました。{'\n'}
-                メールを開いてコードを入力してください。
-              </Text>
+              <Text style={styles.cardTitle}>{t('auth.code_title')}</Text>
+              <Text style={styles.cardDesc}>{t('auth.code_desc', { email })}</Text>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>6桁のコード</Text>
+                <Text style={styles.label}>{t('auth.code_label')}</Text>
                 <TextInput
                   style={[styles.input, styles.codeInput]}
-                  placeholder="123456"
+                  placeholder={t('auth.code_placeholder')}
                   value={code}
-                  onChangeText={(t) => setCode(t.replace(/\D/g, '').slice(0, 6))}
+                  onChangeText={(txt) => setCode(txt.replace(/\D/g, '').slice(0, 6))}
                   keyboardType="number-pad"
                   maxLength={6}
                   returnKeyType="done"
@@ -196,7 +189,7 @@ export function LoginScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryBtnText}>ログイン ✓</Text>
+                  <Text style={styles.primaryBtnText}>{t('auth.verify_button')}</Text>
                 )}
               </TouchableOpacity>
 
@@ -208,7 +201,7 @@ export function LoginScreen() {
                 {loading ? (
                   <ActivityIndicator color={palette.primary} />
                 ) : (
-                  <Text style={styles.secondaryBtnText}>コードを再送する</Text>
+                  <Text style={styles.secondaryBtnText}>{t('auth.resend_code')}</Text>
                 )}
               </TouchableOpacity>
 
@@ -216,7 +209,7 @@ export function LoginScreen() {
                 style={styles.backBtn}
                 onPress={() => { setStep('email'); setError(null); setCode(''); }}
               >
-                <Text style={styles.backBtnText}>← メールアドレスを変更</Text>
+                <Text style={styles.backBtnText}>{t('auth.back_change_email')}</Text>
               </TouchableOpacity>
             </>
           )}

@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { palette, cardShadow, typography, spacing, radii } from '../../lib/designTokens';
 import { useAuth } from '../../lib/AuthContext';
 import { CreateTeamModal } from './CreateTeamModal';
 import { JoinTeamModal } from './JoinTeamModal';
 
 export function TeamSetupScreen() {
+  const { t } = useTranslation();
   const { refreshProfile } = useAuth();
   const [createVisible, setCreateVisible] = useState(false);
   const [joinVisible, setJoinVisible] = useState(false);
@@ -34,10 +36,8 @@ export function TeamSetupScreen() {
       </View>
 
       {/* Title / subtitle */}
-      <Text style={styles.title}>チームに参加しましょう</Text>
-      <Text style={styles.subtitle}>
-        グループでタスクとルーティンを共有できます
-      </Text>
+      <Text style={styles.title}>{t('team.setup_title')}</Text>
+      <Text style={styles.subtitle}>{t('team.setup_subtitle')}</Text>
 
       {/* Action cards */}
       <View style={styles.cardsContainer}>
@@ -47,14 +47,14 @@ export function TeamSetupScreen() {
           activeOpacity={0.82}
           onPress={() => setCreateVisible(true)}
           accessibilityRole="button"
-          accessibilityLabel="チームを作成"
+          accessibilityLabel={t('team.create_card_title')}
         >
           <View style={[styles.cardIconBg, { backgroundColor: palette.primaryMuted }]}>
             <Text style={styles.cardIcon}>🏗️</Text>
           </View>
           <View style={styles.cardTextArea}>
-            <Text style={styles.cardTitle}>チームを作成</Text>
-            <Text style={styles.cardDesc}>新しいチームを作って仲間を招待しよう</Text>
+            <Text style={styles.cardTitle}>{t('team.create_card_title')}</Text>
+            <Text style={styles.cardDesc}>{t('team.create_card_desc')}</Text>
           </View>
           <Text style={styles.cardArrow}>›</Text>
         </TouchableOpacity>
@@ -65,14 +65,14 @@ export function TeamSetupScreen() {
           activeOpacity={0.82}
           onPress={() => setJoinVisible(true)}
           accessibilityRole="button"
-          accessibilityLabel="チームに参加"
+          accessibilityLabel={t('team.join_card_title')}
         >
           <View style={[styles.cardIconBg, { backgroundColor: palette.accentWash }]}>
             <Text style={styles.cardIcon}>🔗</Text>
           </View>
           <View style={styles.cardTextArea}>
-            <Text style={styles.cardTitle}>チームに参加</Text>
-            <Text style={styles.cardDesc}>招待コードを入力してチームに参加</Text>
+            <Text style={styles.cardTitle}>{t('team.join_card_title')}</Text>
+            <Text style={styles.cardDesc}>{t('team.join_card_desc')}</Text>
           </View>
           <Text style={styles.cardArrow}>›</Text>
         </TouchableOpacity>

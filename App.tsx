@@ -1,5 +1,8 @@
 import 'react-native-gesture-handler';
 import { installAlertWebPolyfill } from './lib/alertWebPolyfill';
+// i18n を最初に import すると lib/i18n/index.ts の top-level で init() が走る
+import { loadSavedLanguage } from './lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -22,6 +25,8 @@ import { palette } from './lib/designTokens';
 
 // React Native Web では Alert.alert がサイレントなのでアプリ起動前にポリフィルを入れる
 installAlertWebPolyfill();
+// 保存済みの言語設定を非同期で読み込む（戻り値は無視 — ロードされたら React の re-render が走る）
+void loadSavedLanguage();
 
 // Deep link config for taskly://join/:teamId
 const linking = {
@@ -80,6 +85,7 @@ const ONBOARDING_KEY = 'taskly_has_seen_onboarding';
 function RootRouter() {
   const { session, profile, loading, profileLoading, profileError, signOut, passwordRecoveryMode } =
     useAuth();
+  const { t } = useTranslation();
 
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
@@ -111,7 +117,7 @@ function RootRouter() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={palette.primary} />
-        <Text style={styles.centerText}>読み込み中...</Text>
+        <Text style={styles.centerText}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -120,10 +126,10 @@ function RootRouter() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorTitle}>
-          {profileError ?? 'アカウント情報が取得できません'}
+          {profileError ?? t('errors.profile_not_found')}
         </Text>
         <TouchableOpacity style={styles.retryBtn} onPress={signOut}>
-          <Text style={styles.retryText}>ログアウトして再ログイン</Text>
+          <Text style={styles.retryText}>{t('account.logout')}</Text>
         </TouchableOpacity>
       </View>
     );

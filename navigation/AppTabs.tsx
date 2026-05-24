@@ -8,6 +8,7 @@ import {
   type LayoutChangeEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { TasksScreen } from '../screens/TasksScreen';
 import { RoutinesScreen } from '../screens/RoutinesScreen';
@@ -17,12 +18,13 @@ import { palette } from '../lib/designTokens';
 const Tab = createBottomTabNavigator();
 
 const TABS = [
-  { name: 'Tasks', label: 'タスク', icon: '📋', component: TasksScreen },
-  { name: 'Routines', label: 'ルーティン', icon: '🔁', component: RoutinesScreen },
-  { name: 'Account', label: 'アカウント', icon: '👤', component: AccountScreen },
+  { name: 'Tasks', labelKey: 'tabs.tasks', icon: '📋', component: TasksScreen },
+  { name: 'Routines', labelKey: 'tabs.routines', icon: '🔁', component: RoutinesScreen },
+  { name: 'Account', labelKey: 'tabs.account', icon: '👤', component: AccountScreen },
 ] as const;
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const pb =
     Platform.OS === 'web'
@@ -53,7 +55,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           >
             <Text style={{ fontSize: 18, opacity: isFocused ? 1 : 0.5 }}>{tab?.icon}</Text>
             <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>
-              {tab?.label}
+              {tab ? t(tab.labelKey) : ''}
             </Text>
           </TouchableOpacity>
         );

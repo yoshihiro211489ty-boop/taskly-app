@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { RootStackParamList } from '../navigation/RootStack';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -25,13 +26,13 @@ type Routine = {
   done_today: boolean;
 };
 
-const FREQ_LABEL: Record<string, string> = {
-  daily: '毎日',
-  weekly: '毎週',
-  monthly: '毎月',
-};
-
 export function RoutinesScreen() {
+  const { t } = useTranslation();
+  const FREQ_LABEL: Record<string, string> = {
+    daily: t('routines.freq_daily'),
+    weekly: t('routines.freq_weekly'),
+    monthly: t('routines.freq_monthly'),
+  };
   const { profile } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [routines, setRoutines] = useState<Routine[]>([]);
@@ -124,8 +125,8 @@ export function RoutinesScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.emptyEmoji}>👥</Text>
-        <Text style={styles.emptyTitle}>チームに参加していません</Text>
-        <Text style={styles.emptyHint}>チームを作成するか、招待リンクから参加してください。</Text>
+        <Text style={styles.emptyTitle}>{t('team.no_team_title')}</Text>
+        <Text style={styles.emptyHint}>{t('team.no_team_hint')}</Text>
       </View>
     );
   }
@@ -136,15 +137,15 @@ export function RoutinesScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>ルーティン</Text>
+        <Text style={styles.headerTitle}>{t('routines.title')}</Text>
         <View style={styles.headerRight}>
           {total > 0 && (
-            <Text style={styles.progress}>{done} / {total} 完了</Text>
+            <Text style={styles.progress}>{t('routines.progress', { done, total })}</Text>
           )}
           <TouchableOpacity
             onPress={() => navigation.navigate('RoutineStats')}
             style={styles.statsBtn}
-            accessibilityLabel="達成状況を見る"
+            accessibilityLabel={t('routines.stats_title')}
           >
             <Text style={styles.statsBtnText}>📊</Text>
           </TouchableOpacity>
@@ -153,7 +154,7 @@ export function RoutinesScreen() {
 
       {done === total && total > 0 && (
         <View style={styles.celebration}>
-          <Text style={styles.celebrationText}>🎉 今日のルーティン完了！</Text>
+          <Text style={styles.celebrationText}>{t('routines.all_done')}</Text>
         </View>
       )}
 
@@ -162,8 +163,8 @@ export function RoutinesScreen() {
       ) : routines.length === 0 ? (
         <View style={styles.centered}>
           <Text style={styles.emptyEmoji}>🔁</Text>
-          <Text style={styles.emptyTitle}>ルーティンはありません</Text>
-          <Text style={styles.emptyHint}>右下の＋ボタンから追加できます</Text>
+          <Text style={styles.emptyTitle}>{t('routines.empty_title')}</Text>
+          <Text style={styles.emptyHint}>{t('routines.empty_hint')}</Text>
         </View>
       ) : (
         <FlatList
@@ -172,7 +173,7 @@ export function RoutinesScreen() {
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListFooterComponent={
-            <Text style={styles.editHint}>長押しで編集</Text>
+            <Text style={styles.editHint}>{t('routines.long_press_hint')}</Text>
           }
           renderItem={({ item }) => (
             <TouchableOpacity
