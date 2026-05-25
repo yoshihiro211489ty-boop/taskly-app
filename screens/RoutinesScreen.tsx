@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,29 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import type { RootStackParamList } from '../navigation/RootStack';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
-import { palette, cardShadow } from '../lib/designTokens';
+import {
+  palette,
+  statusColors,
+  shadows,
+  spacing,
+  typography,
+  radii,
+  motion,
+} from '../lib/designTokens';
 import { FAB } from '../components';
 import { CreateRoutineModal } from './CreateRoutineModal';
 
@@ -25,6 +40,38 @@ type Routine = {
   frequency: 'daily' | 'weekly' | 'monthly';
   done_today: boolean;
 };
+
+const FREQ_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  daily:   statusColors.daily,
+  weekly:  statusColors.weekly,
+  monthly: statusColors.monthly,
+};
+
+// ─── Spring checkbox ──────────────────────────────────────────────────────────
+function SpringCheckbox({ done }: { done: boolean }) {
+  const scale = useSharedValue(1);
+  const prevDone = useRef(done);
+
+  if (prevDone.current !== done) {
+    prevDone.current = done;
+    if (done) {
+      scale.value = withSequence(
+        withSpring(1.35, motion.bounce),
+        withSpring(1, motion.snap),
+      );
+    }
+  }
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={[styles.checkbox, done && styles.checkboxDone, animStyle]}>
+      {done && <Text style={styles.checkmark}>✓</Text>}
+    </Animated.View>
+  );
+}
 
 export function RoutinesScreen() {
   const { t } = useTranslation();
@@ -175,29 +222,37 @@ export function RoutinesScreen() {
           ListFooterComponent={
             <Text style={styles.editHint}>{t('routines.long_press_hint')}</Text>
           }
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.card, item.done_today && styles.cardDone]}
-              onPress={() => handleToggle(item)}
-              onLongPress={() => { setEditingRoutine(item); setShowCreateModal(true); }}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.checkbox, item.done_today && styles.checkboxDone]}>
-                {item.done_today && <Text style={styles.checkmark}>✓</Text>}
-              </View>
-              <View style={styles.cardBody}>
-                <Text style={[styles.routineTitle, item.done_today && styles.routineTitleDone]}>
-                  {item.title}
-                </Text>
-                {item.description ? (
-                  <Text style={styles.routineDesc} numberOfLines={1}>{item.description}</Text>
-                ) : null}
-                <View style={styles.freqBadge}>
-                  <Text style={styles.freqText}>{FREQ_LABEL[item.frequency] ?? item.frequency}</Text>
+          renderItem={({ item }) => {
+            const fc = FREQ_COLORS[item.frequency];
+            return (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.card,
+                  item.done_today && styles.cardDone,
+                  pressed && styles.cardPressed,
+                ]}
+                onPress={() => handleToggle(item)}
+                onLongPress={() => { setEditingRoutine(item); setShowCreateModal(true); }}
+              >
+                <SpringCheckbox done={item.done_today} />
+                <View style={styles.cardBody}>
+                  <Text style={[styles.routineTitle, item.done_today && styles.routineTitleDone]}>
+                    {item.title}
+                  </Text>
+                  {item.description ? (
+                    <Text style={styles.routineDesc} numberOfLines={1}>{item.description}</Text>
+                  ) : null}
+                  {fc ? (
+                    <View style={[styles.freqBadge, { backgroundColor: fc.bg, borderColor: fc.border }]}>
+                      <Text style={[styles.freqText, { color: fc.text }]}>
+                        {FREQ_LABEL[item.frequency] ?? item.frequency}
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
-              </View>
-            </TouchableOpacity>
-          )}
+              </Pressable>
+            );
+          }}
         />
       )}
 
@@ -217,10 +272,12 @@ export function RoutinesScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bgPage },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+
+  // Header
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing['5'],
     paddingTop: 56,
-    paddingBottom: 12,
+    paddingBottom: spacing['3'],
     backgroundColor: palette.bgCard,
     borderBottomWidth: 1,
     borderBottomColor: palette.borderLight,
@@ -228,69 +285,117 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
-  headerTitle: { fontSize: 24, fontWeight: '900', color: palette.text },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  progress: { fontSize: 13, color: palette.success, fontWeight: '700' },
+  headerTitle: {
+    fontSize: typography.sizes['2xl'],
+    fontWeight: typography.weights.black,
+    color: palette.text,
+  },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: spacing['2'] },
+  progress: {
+    fontSize: typography.sizes.sm,
+    color: palette.success,
+    fontWeight: typography.weights.bold,
+  },
   statsBtn: { padding: 4 },
   statsBtnText: { fontSize: 20 },
-  list: { padding: 16, gap: 10, paddingBottom: 40 },
+
+  // List
+  list: { padding: spacing['4'], gap: spacing['3'], paddingBottom: 100 },
+
+  // Card
   card: {
     backgroundColor: palette.bgCard,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: radii.xl,
+    padding: spacing['4'],
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    ...cardShadow,
+    gap: spacing['3'],
+    ...shadows.sm,
   },
-  cardDone: { opacity: 0.65 },
+  cardDone: { opacity: 0.6 },
+  cardPressed: { opacity: 0.8 },
+
+  // Checkbox
   checkbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 30,
+    height: 30,
+    borderRadius: radii.sm,
     borderWidth: 2,
     borderColor: palette.border,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: palette.bgPage,
   },
   checkboxDone: {
     backgroundColor: palette.success,
     borderColor: palette.success,
   },
-  checkmark: { color: '#fff', fontSize: 16, fontWeight: '900' },
+  checkmark: {
+    color: palette.onInverse,
+    fontSize: 16,
+    fontWeight: typography.weights.black,
+  },
+
+  // Card body
   cardBody: { flex: 1 },
-  routineTitle: { fontSize: 15, fontWeight: '700', color: palette.text, marginBottom: 2 },
-  routineTitleDone: { textDecorationLine: 'line-through', color: palette.textSubtle },
-  routineDesc: { fontSize: 12, color: palette.textMuted, marginBottom: 6 },
+  routineTitle: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.bold,
+    color: palette.text,
+    marginBottom: 2,
+  },
+  routineTitleDone: {
+    textDecorationLine: 'line-through',
+    color: palette.textSubtle,
+  },
+  routineDesc: {
+    fontSize: typography.sizes.xs,
+    color: palette.textMuted,
+    marginBottom: spacing['2'],
+  },
   freqBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: palette.bgSubtle,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 20,
+    paddingHorizontal: spacing['2'],
+    paddingVertical: 3,
+    borderRadius: radii.full,
+    borderWidth: 1,
   },
-  freqText: { fontSize: 11, color: palette.primary, fontWeight: '700' },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
-  emptyTitle: { fontSize: 15, fontWeight: '700', color: palette.text, marginBottom: 6 },
-  emptyHint: { fontSize: 13, color: palette.textMuted, textAlign: 'center' },
+  freqText: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  },
+
+  // Empty
+  emptyEmoji: { fontSize: 40, marginBottom: spacing['3'] },
+  emptyTitle: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.bold,
+    color: palette.text,
+    marginBottom: spacing['2'],
+  },
+  emptyHint: { fontSize: typography.sizes.sm, color: palette.textMuted, textAlign: 'center' },
+
+  // Celebration
   celebration: {
-    backgroundColor: palette.successBg,
+    backgroundColor: palette.accentMuted,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing['5'],
     borderBottomWidth: 1,
-    borderBottomColor: palette.successBorder,
+    borderBottomColor: palette.accent + '40',
     alignItems: 'center',
   },
   celebrationText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: palette.success,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.bold,
+    color: palette.accent,
   },
+
+  // Edit hint
   editHint: {
     textAlign: 'center',
-    fontSize: 11,
+    fontSize: typography.sizes.xs,
     color: palette.textSubtle,
-    paddingVertical: 8,
+    paddingVertical: spacing['2'],
     paddingBottom: 80,
   },
 });

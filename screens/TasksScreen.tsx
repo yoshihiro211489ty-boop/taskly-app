@@ -7,12 +7,20 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  Pressable,
   Alert,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
-import { palette, cardShadow } from '../lib/designTokens';
+import {
+  palette,
+  statusColors,
+  shadows,
+  spacing,
+  typography,
+  radii,
+} from '../lib/designTokens';
 import { formatRelativeTime } from '../lib/time';
 import { FAB } from '../components';
 import { CreateTaskModal } from './CreateTaskModal';
@@ -34,10 +42,10 @@ type Task = {
   updated_at: string;
 };
 
-const STATUS_COLOR: Record<TaskStatus, string> = {
-  todo: palette.neutral,
-  in_progress: palette.primary,
-  done: palette.success,
+const STATUS_COLORS_MAP: Record<TaskStatus, { bg: string; text: string; border: string }> = {
+  todo:        statusColors.todo,
+  in_progress: statusColors.inProgress,
+  done:        statusColors.done,
 };
 
 const STATUS_CYCLE: Record<TaskStatus, TaskStatus> = {
@@ -187,7 +195,7 @@ export function TasksScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.centered}><ActivityIndicator /></View>
+        <View style={styles.centered}><ActivityIndicator color={palette.primary} /></View>
       ) : filteredTasks.length === 0 ? (
         <View style={styles.centered}>
           <Text style={styles.emptyEmoji}>📭</Text>
@@ -198,48 +206,50 @@ export function TasksScreen() {
           data={filteredTasks}
           keyExtractor={(t) => t.id}
           contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => { setEditingTask(item); setShowCreateModal(true); }}
-            >
-              <View style={styles.card}>
-                <View style={styles.cardTop}>
-                  <Text style={styles.taskTitle} numberOfLines={2}>{item.title}</Text>
-                  <View style={styles.cardTopRight}>
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />}
+          renderItem={({ item }) => {
+            const sc = STATUS_COLORS_MAP[item.status];
+            return (
+              <Pressable
+                onPress={() => { setEditingTask(item); setShowCreateModal(true); }}
+                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              >
+                {/* Left accent bar */}
+                <View style={[styles.cardAccent, { backgroundColor: sc.text }]} />
+                <View style={styles.cardContent}>
+                  <View style={styles.cardTop}>
+                    <Text style={styles.taskTitle} numberOfLines={2}>{item.title}</Text>
                     <TouchableOpacity
-                      style={[styles.cycleBtn, { backgroundColor: STATUS_COLOR[item.status] + '22' }]}
+                      style={[styles.cycleBtn, { backgroundColor: sc.bg, borderColor: sc.border }]}
                       onPress={() => cycleStatus(item)}
                       hitSlop={{ top: 6, left: 6, bottom: 6, right: 6 }}
                       accessibilityLabel="ステータスを変更"
                     >
-                      <Text style={[styles.statusText, { color: STATUS_COLOR[item.status] }]}>
+                      <Text style={[styles.statusText, { color: sc.text }]}>
                         {STATUS_LABEL[item.status]}
                       </Text>
-                      <Text style={[styles.cycleArrow, { color: STATUS_COLOR[item.status] }]}>→</Text>
                     </TouchableOpacity>
                   </View>
+                  {item.description ? (
+                    <Text style={styles.taskDesc} numberOfLines={2}>{item.description}</Text>
+                  ) : null}
+                  <View style={styles.cardMeta}>
+                    {item.assignee_name && (
+                      <Text style={styles.metaChip}>👤 {item.assignee_name}</Text>
+                    )}
+                    {item.deadline && (
+                      <Text style={styles.metaChip}>📅 {item.deadline.slice(0, 10)}</Text>
+                    )}
+                    {item.updated_by_name && (
+                      <Text style={styles.metaChip}>
+                        ✏️ {item.updated_by_name} · {formatRelativeTime(item.updated_at)}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-                {item.description ? (
-                  <Text style={styles.taskDesc} numberOfLines={2}>{item.description}</Text>
-                ) : null}
-                <View style={styles.cardMeta}>
-                  {item.assignee_name && (
-                    <Text style={styles.metaText}>👤 {item.assignee_name}</Text>
-                  )}
-                  {item.deadline && (
-                    <Text style={styles.metaText}>📅 {item.deadline.slice(0, 10)}</Text>
-                  )}
-                  {item.updated_by_name && (
-                    <Text style={styles.metaText}>
-                      ✏️ {item.updated_by_name} · {formatRelativeTime(item.updated_at)}
-                    </Text>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
+              </Pressable>
+            );
+          }}
         />
       )}
 
@@ -262,67 +272,117 @@ export function TasksScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bgPage },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+
+  // Header
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing['5'],
     paddingTop: 56,
-    paddingBottom: 12,
+    paddingBottom: spacing['3'],
     backgroundColor: palette.bgCard,
     borderBottomWidth: 1,
     borderBottomColor: palette.borderLight,
   },
-  headerTitle: { fontSize: 24, fontWeight: '900', color: palette.text },
-  headerTeam: { fontSize: 13, color: palette.primary, fontWeight: '600', marginTop: 2 },
+  headerTitle: {
+    fontSize: typography.sizes['2xl'],
+    fontWeight: typography.weights.black,
+    color: palette.text,
+  },
+  headerTeam: {
+    fontSize: typography.sizes.sm,
+    color: palette.primary,
+    fontWeight: typography.weights.semibold,
+    marginTop: 2,
+  },
+
+  // Filter
   filterRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
+    paddingHorizontal: spacing['4'],
+    paddingVertical: spacing['2'],
+    gap: spacing['2'],
+    backgroundColor: palette.bgCard,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.borderLight,
   },
   filterBtn: {
     flex: 1,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: radii.full,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: palette.border,
-    backgroundColor: palette.bgCard,
+    borderWidth: 1.5,
+    borderColor: palette.borderLight,
+    backgroundColor: palette.bgPage,
   },
   filterBtnActive: {
-    backgroundColor: palette.primary,
+    backgroundColor: palette.primaryMuted,
     borderColor: palette.primary,
   },
-  filterText: { fontSize: 13, fontWeight: '700', color: palette.textMuted },
-  filterTextActive: { color: '#fff' },
-  list: { padding: 16, gap: 12, paddingBottom: 40 },
+  filterText: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.bold,
+    color: palette.textMuted,
+  },
+  filterTextActive: { color: palette.primary },
+
+  // List
+  list: { padding: spacing['4'], gap: spacing['3'], paddingBottom: 100 },
+
+  // Card
   card: {
     backgroundColor: palette.bgCard,
-    borderRadius: 16,
-    padding: 16,
-    ...cardShadow,
+    borderRadius: radii.xl,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    ...shadows.sm,
+  },
+  cardPressed: { opacity: 0.85 },
+  cardAccent: {
+    width: 4,
+  },
+  cardContent: {
+    flex: 1,
+    padding: spacing['4'],
   },
   cardTop: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 6,
+    gap: spacing['2'],
+    marginBottom: spacing['1'],
   },
-  taskTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: palette.text },
-  cardTopRight: { flexDirection: 'row', alignItems: 'center' },
+  taskTitle: {
+    flex: 1,
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.bold,
+    color: palette.text,
+    lineHeight: typography.sizes.base * 1.4,
+  },
   cycleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
     paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 20,
+    paddingVertical: 4,
+    borderRadius: radii.full,
+    borderWidth: 1,
   },
-  cycleArrow: { fontSize: 11, fontWeight: '700' },
-  statusText: { fontSize: 11, fontWeight: '700' },
-  taskDesc: { fontSize: 13, color: palette.textMuted, lineHeight: 18, marginBottom: 8 },
-  cardMeta: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
-  metaText: { fontSize: 12, color: palette.textSubtle },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
-  emptyTitle: { fontSize: 15, fontWeight: '700', color: palette.text, marginBottom: 6 },
-  emptyHint: { fontSize: 13, color: palette.textMuted, textAlign: 'center' },
+  statusText: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  },
+  taskDesc: {
+    fontSize: typography.sizes.sm,
+    color: palette.textMuted,
+    lineHeight: typography.sizes.sm * 1.5,
+    marginBottom: spacing['2'],
+  },
+  cardMeta: { flexDirection: 'row', gap: spacing['3'], flexWrap: 'wrap', marginTop: 4 },
+  metaChip: { fontSize: typography.sizes.xs, color: palette.textSubtle },
+
+  // Empty
+  emptyEmoji: { fontSize: 40, marginBottom: spacing['3'] },
+  emptyTitle: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.bold,
+    color: palette.text,
+    marginBottom: spacing['2'],
+  },
+  emptyHint: { fontSize: typography.sizes.sm, color: palette.textMuted, textAlign: 'center' },
 });

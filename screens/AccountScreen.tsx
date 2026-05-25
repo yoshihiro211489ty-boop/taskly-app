@@ -13,11 +13,19 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootStack';
 import { useAuth } from '../lib/AuthContext';
-import { palette, cardShadow, typography, spacing, radii } from '../lib/designTokens';
+import {
+  palette,
+  gradients,
+  shadows,
+  typography,
+  spacing,
+  radii,
+} from '../lib/designTokens';
 import { LanguageSwitcher } from '../lib/i18n/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { InviteCodeModal } from './team/InviteCodeModal';
@@ -212,7 +220,14 @@ function PasswordChangeModal({
             style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
             onPress={handleSave}
             disabled={saving}
+            activeOpacity={0.85}
           >
+            <LinearGradient
+              colors={gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[StyleSheet.absoluteFill, { borderRadius: radii.lg }]}
+            />
             {saving ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
@@ -307,6 +322,12 @@ export function AccountScreen() {
         {/* ── Profile card ─────────────────────────────────────────────────── */}
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
+            <LinearGradient
+              colors={gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
             <Text style={styles.avatarText}>
               {profile?.name?.charAt(0)?.toUpperCase() ?? '?'}
             </Text>
@@ -464,19 +485,19 @@ const styles = StyleSheet.create({
     borderRadius: radii.xl,
     padding: spacing['6'],
     alignItems: 'center',
-    ...cardShadow,
+    ...shadows.md,
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: palette.primary,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing['3'],
+    overflow: 'hidden',
   },
   avatarText: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '900',
     color: palette.onInverse,
   },
