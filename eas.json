@@ -12,6 +12,9 @@
       },
       "ios": {
         "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "preview": {
@@ -21,6 +24,9 @@
       },
       "ios": {
         "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
@@ -30,6 +36,9 @@
       },
       "ios": {
         "simulator": false
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   },
@@ -39,6 +48,10 @@
         "appleId": "APPLE_ID_PLACEHOLDER",
         "ascAppId": "APP_STORE_CONNECT_APP_ID_PLACEHOLDER",
         "appleTeamId": "APPLE_TEAM_ID_PLACEHOLDER"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
       }
     }
   }
