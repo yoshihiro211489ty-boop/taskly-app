@@ -35,7 +35,6 @@
         "backgroundColor": "#F6F8FC"
       },
       "package": "com.taskly.app",
-      "versionCode": 1,
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE"
