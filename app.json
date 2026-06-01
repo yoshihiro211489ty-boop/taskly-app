@@ -20,7 +20,10 @@
         "NSCameraUsageDescription": "プロフィール写真の撮影に使用します。",
         "NSUserNotificationsUsageDescription": "タスクの期限やルーティンのリマインダーをお知らせします。",
         "NSUserTrackingUsageDescription": "アプリの改善のためにご利用状況を分析します。",
-        "UIBackgroundModes": ["fetch", "remote-notification"]
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -50,8 +53,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "bcdb4a89-9651-461b-b4c9-b6dcce67d016"
       }
-    }
+    },
+    "owner": "yoshihiro211489ty"
   }
 }
