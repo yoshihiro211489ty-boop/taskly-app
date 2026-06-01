@@ -10,7 +10,14 @@
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint --silent --quiet"
+    "check": "npm run typecheck && npm run lint --silent --quiet",
+    "build:ios": "eas build --platform ios --profile production",
+    "build:android": "eas build --platform android --profile production",
+    "build:all": "eas build --platform all --profile production",
+    "submit:ios": "eas submit --platform ios",
+    "submit:android": "eas submit --platform android",
+    "preview:ios": "eas build --platform ios --profile preview",
+    "preview:android": "eas build --platform android --profile preview"
   },
   "dependencies": {
     "@babel/runtime": "^7.25.0",
