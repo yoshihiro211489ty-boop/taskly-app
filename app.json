@@ -48,8 +48,7 @@
           "color": "#4F5DEB",
           "sounds": []
         }
-      ],
-      "react-native-purchases"
+      ]
     ],
     "extra": {
       "eas": {
