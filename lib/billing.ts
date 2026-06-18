@@ -1,4 +1,5 @@
 import Purchases, { LOG_LEVEL, type CustomerInfo } from 'react-native-purchases';
+import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
 // TODO: RevenueCat ダッシュボード (app.revenuecat.com) でアプリを作成して
@@ -59,4 +60,17 @@ export async function purchasePremium(packageToBuy: Parameters<typeof Purchases.
 export async function restorePurchases(): Promise<boolean> {
   const info = await Purchases.restorePurchases();
   return info.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
+}
+
+export function usePremium(): { isPremium: boolean; loading: boolean } {
+  const [premium, setPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    isPremium()
+      .then(setPremium)
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { isPremium: premium, loading };
 }

@@ -24,6 +24,10 @@ import {
 import { formatRelativeTime } from '../lib/time';
 import { FAB } from '../components';
 import { CreateTaskModal } from './CreateTaskModal';
+import { usePremium, FREE_LIMITS } from '../lib/billing';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/RootStack';
 
 type TaskStatus = 'todo' | 'in_progress' | 'done';
 
@@ -62,6 +66,8 @@ export function TasksScreen() {
     done: t('tasks.status_done'),
   };
   const { profile } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isPremium } = usePremium();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +75,22 @@ export function TasksScreen() {
   const [filter, setFilter] = useState<'all' | 'mine'>('mine');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  const handleFABPress = () => {
+    if (!isPremium && tasks.length >= FREE_LIMITS.maxTasks) {
+      Alert.alert(
+        '⭐ タスク上限に達しました',
+        `無料プランはタスク${FREE_LIMITS.maxTasks}件まで。プレミアムにアップグレードすると無制限になります。`,
+        [
+          { text: 'キャンセル', style: 'cancel' },
+          { text: 'アップグレード', onPress: () => navigation.navigate('Premium') },
+        ]
+      );
+      return;
+    }
+    setEditingTask(null);
+    setShowCreateModal(true);
+  };
 
   const load = useCallback(async () => {
     if (!profile?.teamId) return;
@@ -254,7 +276,7 @@ export function TasksScreen() {
       )}
 
       {profile.teamId && (
-        <FAB onPress={() => { setEditingTask(null); setShowCreateModal(true); }} />
+        <FAB onPress={handleFABPress} />
       )}
 
       <CreateTaskModal

@@ -1,5 +1,16 @@
 import 'react-native-gesture-handler';
+import * as Sentry from '@sentry/react-native';
 import { installAlertWebPolyfill } from './lib/alertWebPolyfill';
+
+// TODO: Sentry DSN を sentry.io でプロジェクト作成後に取得して設定
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN ?? '';
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    tracesSampleRate: 0.2,
+    environment: __DEV__ ? 'development' : 'production',
+  });
+}
 // i18n を最初に import すると lib/i18n/index.ts の top-level で init() が走る
 import { loadSavedLanguage } from './lib/i18n';
 import { useTranslation } from 'react-i18next';

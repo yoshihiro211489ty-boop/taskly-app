@@ -3,6 +3,7 @@ import { AppTabs } from './AppTabs';
 import { TaskDetailScreen } from '../screens/TaskDetailScreen';
 import { TeamMembersScreen } from '../screens/team/TeamMembersScreen';
 import { RoutineStatsScreen } from '../screens/RoutineStatsScreen';
+import { PremiumScreen } from '../screens/PremiumScreen';
 import type { Task } from '../screens/CreateTaskModal';
 import { palette } from '../lib/designTokens';
 
@@ -11,6 +12,7 @@ export type RootStackParamList = {
   TaskDetail: { task: Task };
   TeamMembers: undefined;
   RoutineStats: undefined;
+  Premium: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -62,6 +64,11 @@ export function RootStack() {
           headerShadowVisible: false,
           presentation: 'card',
         }}
+      />
+      <Stack.Screen
+        name="Premium"
+        component={PremiumScreen}
+        options={{ presentation: 'modal', headerShown: false }}
       />
     </Stack.Navigator>
   );

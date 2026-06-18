@@ -8,6 +8,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Pressable,
+  Alert,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -32,6 +33,7 @@ import {
 } from '../lib/designTokens';
 import { FAB } from '../components';
 import { CreateRoutineModal } from './CreateRoutineModal';
+import { usePremium, FREE_LIMITS } from '../lib/billing';
 
 type Routine = {
   id: string;
@@ -82,7 +84,24 @@ export function RoutinesScreen() {
   };
   const { profile } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isPremium } = usePremium();
   const [routines, setRoutines] = useState<Routine[]>([]);
+
+  const handleFABPress = () => {
+    if (!isPremium && routines.length >= FREE_LIMITS.maxRoutines) {
+      Alert.alert(
+        '⭐ ルーティン上限に達しました',
+        `無料プランはルーティン${FREE_LIMITS.maxRoutines}件まで。プレミアムにアップグレードすると無制限になります。`,
+        [
+          { text: 'キャンセル', style: 'cancel' },
+          { text: 'アップグレード', onPress: () => navigation.navigate('Premium') },
+        ]
+      );
+      return;
+    }
+    setEditingRoutine(null);
+    setShowCreateModal(true);
+  };
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -256,7 +275,7 @@ export function RoutinesScreen() {
         />
       )}
 
-      <FAB onPress={() => { setEditingRoutine(null); setShowCreateModal(true); }} />
+      <FAB onPress={handleFABPress} />
 
       <CreateRoutineModal
         visible={showCreateModal}

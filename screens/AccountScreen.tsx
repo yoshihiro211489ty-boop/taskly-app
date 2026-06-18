@@ -30,6 +30,7 @@ import { LanguageSwitcher } from '../lib/i18n/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { InviteCodeModal } from './team/InviteCodeModal';
 import Constants from 'expo-constants';
+import { usePremium } from '../lib/billing';
 
 // ─── External URLs ───────────────────────────────────────────────────────────
 // TODO: 本番ドメイン確定後に置き換える（Notion公開ページ → 独自ドメインへ集約予定）
@@ -248,6 +249,7 @@ export function AccountScreen() {
   const [pwModalVisible, setPwModalVisible] = useState(false);
   const [inviteModalVisible, setInviteModalVisible] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const { isPremium } = usePremium();
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -319,6 +321,29 @@ export function AccountScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Premium banner ───────────────────────────────────────────────── */}
+        {!isPremium && (
+          <TouchableOpacity
+            style={styles.premiumBanner}
+            onPress={() => navigation.navigate('Premium')}
+            activeOpacity={0.85}
+          >
+            <LinearGradient colors={gradients.primary} style={styles.premiumBannerGradient}>
+              <Text style={styles.premiumBannerEmoji}>⭐</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.premiumBannerTitle}>プレミアムにアップグレード</Text>
+                <Text style={styles.premiumBannerDesc}>タスク・ルーティン無制限 + 詳細統計</Text>
+              </View>
+              <Text style={styles.premiumBannerChevron}>›</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+        {isPremium && (
+          <View style={styles.premiumActiveBadge}>
+            <Text style={styles.premiumActiveBadgeText}>⭐ プレミアム会員</Text>
+          </View>
+        )}
+
         {/* ── Profile card ─────────────────────────────────────────────────── */}
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
@@ -476,6 +501,53 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xl,
     fontWeight: '900',
     color: palette.text,
+  },
+
+  // Premium banner
+  premiumBanner: {
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['4'],
+    borderRadius: radii.xl,
+    overflow: 'hidden',
+    ...shadows.md,
+  },
+  premiumBannerGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing['4'],
+    paddingVertical: spacing['3'],
+    gap: spacing['3'],
+  },
+  premiumBannerEmoji: { fontSize: 24 },
+  premiumBannerTitle: {
+    color: '#fff',
+    fontWeight: typography.weights.black,
+    fontSize: typography.sizes.base,
+  },
+  premiumBannerDesc: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: typography.sizes.xs,
+    marginTop: 2,
+  },
+  premiumBannerChevron: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '300',
+  },
+  premiumActiveBadge: {
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['4'],
+    backgroundColor: palette.accentMuted,
+    borderRadius: radii.xl,
+    padding: spacing['3'],
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: palette.accent + '60',
+  },
+  premiumActiveBadgeText: {
+    color: palette.accent,
+    fontWeight: typography.weights.bold,
+    fontSize: typography.sizes.sm,
   },
 
   // Profile card
