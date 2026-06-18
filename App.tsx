@@ -22,6 +22,8 @@ import { RootStack } from './navigation/RootStack';
 import { TeamSetupScreen } from './screens/team/TeamSetupScreen';
 import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
 import { palette } from './lib/designTokens';
+import { registerForPushNotifications, setupNotificationListeners } from './lib/notifications';
+import { initBilling } from './lib/billing';
 
 // React Native Web では Alert.alert がサイレントなのでアプリ起動前にポリフィルを入れる
 installAlertWebPolyfill();
@@ -96,6 +98,20 @@ function RootRouter() {
       setOnboardingChecked(true);
     });
   }, []);
+
+  // 課金 SDK 初期化（セッション確立後）
+  useEffect(() => {
+    if (session?.user) {
+      void initBilling(session.user.id);
+    }
+  }, [session]);
+
+  // プッシュ通知の登録とリスナー設定
+  useEffect(() => {
+    if (!profile?.id) return;
+    void registerForPushNotifications(profile.id);
+    return setupNotificationListeners();
+  }, [profile?.id]);
 
   const completeOnboarding = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
