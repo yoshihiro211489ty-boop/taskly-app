@@ -32,11 +32,8 @@ import { InviteCodeModal } from './team/InviteCodeModal';
 import Constants from 'expo-constants';
 import { usePremium } from '../lib/billing';
 
-// ─── External URLs ───────────────────────────────────────────────────────────
-// TODO: 本番ドメイン確定後に置き換える（Notion公開ページ → 独自ドメインへ集約予定）
-const PRIVACY_URL: string | null = null;
-const TERMS_URL: string | null = null;
-const SUPPORT_EMAIL: string | null = null;
+// ─── Contact ─────────────────────────────────────────────────────────────────
+const SUPPORT_EMAIL = 'yosihiro1988ty@yahoo.co.jp';
 
 // ─── App version ─────────────────────────────────────────────────────────────
 const APP_VERSION =
@@ -295,18 +292,10 @@ export function AccountScreen() {
     setInviteModalVisible(true);
   };
 
-  const handlePrivacy = () => {
-    if (PRIVACY_URL) void Linking.openURL(PRIVACY_URL);
-    else showAlert(t('common.coming_soon'), t('account.privacy_coming_soon'));
-  };
-  const handleTerms = () => {
-    if (TERMS_URL) void Linking.openURL(TERMS_URL);
-    else showAlert(t('common.coming_soon'), t('account.terms_coming_soon'));
-  };
-  const handleSupport = () => {
-    if (SUPPORT_EMAIL) void Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=お問い合わせ`);
-    else showAlert(t('common.coming_soon'), t('account.contact_coming_soon'));
-  };
+  const handlePrivacy = () => navigation.navigate('Legal', { type: 'privacy' });
+  const handleTerms = () => navigation.navigate('Legal', { type: 'terms' });
+  const handleSupport = () =>
+    void Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=お問い合わせ`);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 

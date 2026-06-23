@@ -1,15 +1,15 @@
 # Privacy Policy
 
 **App Name**: Taskly (タスクリー)  
-**Operator**: [Operator Name]  
+**Operator**: Individual Developer  
 **Version**: 1.0  
-**Effective Date**: [YYYY-MM-DD]
+**Effective Date**: 2026-06-24
 
 ---
 
 ## 1. Our Commitment to Privacy
 
-[Operator Name] ("we," "us," or "our") takes the protection of your personal information seriously. This Privacy Policy ("Policy") explains what information we collect through the Taskly app ("Service"), how we use it, how we protect it, and your rights regarding your data.
+Individual Developer ("we," "us," or "our") takes the protection of your personal information seriously. This Privacy Policy ("Policy") explains what information we collect through the Taskly app ("Service"), how we use it, how we protect it, and your rights regarding your data.
 
 By using the Service, you agree to the collection and use of information as described in this Policy. If you do not agree with this Policy, please do not use the Service.
 
@@ -156,8 +156,8 @@ In accordance with Apple's privacy requirements, the following table summarizes 
 
 If you have questions or concerns about this Policy or our data practices, please contact us at:
 
-**Support Email**: [support email address]  
-**Operator**: [Operator Name]  
+**Support Email**: yosihiro1988ty@yahoo.co.jp  
+**Operator**: Individual Developer  
 **Address**: [Address]
 
 ---
@@ -170,8 +170,8 @@ We may update this Policy from time to time to reflect changes in the law or our
 
 ## 13. Effective Date
 
-This Policy is effective as of [YYYY-MM-DD].
+This Policy is effective as of 2026-06-24.
 
 ---
 
-*© [Operator Name]. All rights reserved.*
+*© Individual Developer. All rights reserved.*

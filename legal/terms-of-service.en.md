@@ -1,15 +1,15 @@
 # Terms of Service
 
 **App Name**: Taskly (タスクリー)  
-**Operator**: [Operator Name]  
+**Operator**: Individual Developer  
 **Version**: 1.0  
-**Effective Date**: [YYYY-MM-DD]
+**Effective Date**: 2026-06-24
 
 ---
 
 ## 1. About the Service
 
-Taskly ("Service") is a mobile application provided by [Operator Name] ("we," "us," or "our") that enables groups and teams to share and manage tasks and routines together. The Service is designed primarily for school and university clubs, hobby groups, and small business teams who want to collaborate on task management.
+Taskly ("Service") is a mobile application provided by Individual Developer ("we," "us," or "our") that enables groups and teams to share and manage tasks and routines together. The Service is designed primarily for school and university clubs, hobby groups, and small business teams who want to collaborate on task management.
 
 These Terms of Service ("Terms") govern your use of the Service. Please read them carefully before using the Service. By accessing or using the Service, you agree to be bound by these Terms. If you do not agree, please do not use the Service.
 
@@ -169,16 +169,16 @@ If any provision of these Terms is held to be invalid or unenforceable, the rema
 
 If you have questions about these Terms, please contact us at:
 
-**Support Email**: [support email address]  
-**Operator**: [Operator Name]  
+**Support Email**: yosihiro1988ty@yahoo.co.jp  
+**Operator**: Individual Developer  
 **Address**: [Address]
 
 ---
 
 ## 15. Effective Date
 
-These Terms are effective as of [YYYY-MM-DD].
+These Terms are effective as of 2026-06-24.
 
 ---
 
-*© [Operator Name]. All rights reserved.*
+*© Individual Developer. All rights reserved.*
