@@ -14,7 +14,7 @@ export type RootStackParamList = {
   TeamMembers: undefined;
   RoutineStats: undefined;
   Premium: undefined;
-  Legal: { type: 'privacy' | 'terms' };
+  Legal: { type: 'privacy' | 'terms' | 'tokushoho' };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -77,7 +77,12 @@ export function RootStack() {
         component={LegalScreen}
         options={({ route }) => ({
           headerShown: true,
-          title: route.params.type === 'privacy' ? 'プライバシーポリシー' : '利用規約',
+          title:
+            route.params.type === 'privacy'
+              ? 'プライバシーポリシー'
+              : route.params.type === 'terms'
+              ? '利用規約'
+              : '特定商取引法に基づく表記',
           headerBackTitle: '戻る',
           headerTintColor: palette.primary,
           headerStyle: { backgroundColor: palette.bgCard },

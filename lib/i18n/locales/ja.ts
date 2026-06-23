@@ -185,6 +185,7 @@ export const ja = {
     change_password_success: 'パスワードを変更しました',
     privacy: 'プライバシーポリシー',
     terms: '利用規約',
+    tokushoho: '特定商取引法に基づく表記',
     contact: 'お問い合わせ',
     logout: 'ログアウト',
     logout_confirm_title: 'ログアウト',

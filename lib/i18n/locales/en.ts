@@ -185,6 +185,7 @@ export const en = {
     change_password_success: 'Password updated',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
+    tokushoho: 'Specified Commercial Transaction Act',
     contact: 'Contact us',
     logout: 'Log out',
     logout_confirm_title: 'Log out',

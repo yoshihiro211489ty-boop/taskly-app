@@ -294,6 +294,7 @@ export function AccountScreen() {
 
   const handlePrivacy = () => navigation.navigate('Legal', { type: 'privacy' });
   const handleTerms = () => navigation.navigate('Legal', { type: 'terms' });
+  const handleTokushoho = () => navigation.navigate('Legal', { type: 'tokushoho' });
   const handleSupport = () =>
     void Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=お問い合わせ`);
 
@@ -414,6 +415,12 @@ export function AccountScreen() {
             icon="📄"
             label={t('account.terms')}
             onPress={handleTerms}
+          />
+          <View style={styles.rowSeparator} />
+          <SettingsRow
+            icon="🏪"
+            label={t('account.tokushoho')}
+            onPress={handleTokushoho}
           />
           <View style={styles.rowSeparator} />
           <SettingsRow
